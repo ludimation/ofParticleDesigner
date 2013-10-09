@@ -25,6 +25,7 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 #include "ofxParticleEmitter.h"
+#include "ofxSimpleGuiToo.h"
 
 class testApp : public ofBaseApp{
 
@@ -54,8 +55,15 @@ private:
 	GLfloat			radialAccelVariance, tangentialAccelVariance;
 	Vector2f		gravity;	
 	GLfloat			particleLifespan, particleLifespanVariance;			
-	Color4f			startColor, startColorVariance;						
-	Color4f			finishColor, finishColorVariance;
+    // TODO: clean this up?
+    //	Color4f			startColor, startColorVariance;						
+    //	Color4f			finishColor, finishColorVariance;
+    // Brute force fix for above
+    ofFloatColor    startColor;
+    ofFloatColor    startColorVariance;
+    // end brute force
+    ofFloatColor    finishColor;
+    ofFloatColor    finishColorVariance;
 	GLfloat			startParticleSize, startParticleSizeVariance;
 	GLfloat			finishParticleSize, finishParticleSizeVariance;
 	GLint			maxParticles;
@@ -72,7 +80,7 @@ private:
     
     bool            bPlay, bSaveParticleXML, bNormal, bAddictive;
     bool            circle1, circle2, circle3, particle1, particle2, particle3, particle4, particle5, particle6;
-    bool            circles, drugs, fire, sun, waterfall, jellyfish;
+    bool            circles, drugs, fire, sun, waterfall, jellyfish, circles_wave, particle_settings;
     
     int             blendSrc, blendDst;
     
@@ -82,4 +90,8 @@ private:
     int             getBlendType(int s);
     void            saveToParticleXML();
     void            loadFromParticleXML(string xmlname);
+    void            colorsUpdateGUI();
+    void            colorsUpdateEmitter();
+
+        
 };

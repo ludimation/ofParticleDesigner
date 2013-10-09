@@ -22,7 +22,7 @@
 
 #include "testApp.h"
 
-#include "ofxSimpleGuiToo.h"
+//#include "ofxSimpleGuiToo.h"
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -30,7 +30,7 @@ void testApp::setup(){
     ofBackground(0, 0, 0);
 	ofSetVerticalSync(true);
     
-    loadFromParticleXML( "circles.pex" );
+    loadFromParticleXML( "particle_settings.pex" );
     
     bPlay = false;
     circle1 = false;
@@ -49,12 +49,15 @@ void testApp::setup(){
     sun = false;
     waterfall = false;
     jellyfish = false;
+    circles_wave = false;
+    particle_settings = false;
     
     speed = 0.0;
     duration = -1.0;
     
     // 'gui' is a global variable declared in ofxSimpleGuiToo.h
     //---------- SETTINGS ---------------
+    // colorsUpdateGUI : set colors base on particle emitter values    
 	gui.addTitle("Particle Settings");
     
 	//gui.addToggle("Play", bPlay);
@@ -111,11 +114,31 @@ void testApp::setup(){
     //----------- COLOR ------------------
     gui.addPage("Color");
     gui.addTitle("Color");
+
+/*  // This original code did not work because
+    // the "addColorPicker" function expects an "ofFloatColor"
+    // but m_emitter.<*color*> is a "Color4f" struct
+    // so I had to hack a
+    // brute force solution below
 	gui.addColorPicker("Start Color", &(m_emitter.startColor).red);
     gui.addColorPicker("Start Color Var", &(m_emitter.startColorVariance).red);
     gui.addColorPicker("End Color", &(m_emitter.finishColor).red);
     gui.addColorPicker("End Color Var", &(m_emitter.finishColorVariance).red);
     
+//*/
+///* // brute force color picker solution 
+    colorsUpdateGUI();
+    gui.addColorPicker("Start Color", startColor);
+    gui.addColorPicker("Start Color Var", startColorVariance);
+    gui.addColorPicker("End Color", finishColor);
+    gui.addColorPicker("End Color Var", finishColorVariance);
+//*/
+/*	// This didn't work either because m_emitter.startColor is a 
+    gui.addColorPicker("Start Color", m_emitter.startColor);
+    gui.addColorPicker("Start Color Var", m_emitter.startColorVariance);
+    gui.addColorPicker("End Color", m_emitter.finishColor);
+    gui.addColorPicker("End Color Var", m_emitter.finishColorVariance);
+//*/
     gui.addTitle("Blend Mode");
     string glTitleArray[] = {"GL_ZERO", "GL_ONE", "GL_DST_COLOR", "GL_ONE_MINUS_DST_COLOR", "GL_SRC_ALPHA", "GL_ONE_MINUS_SRC_ALPHA", "GL_DST_ALPHA",
     "GL_ONE_MINUS_DST_ALPHA", "GL_SRC_ALPHA_SATURATE"};
@@ -145,7 +168,8 @@ void testApp::setup(){
     gui.addButton("Sun", sun);
     gui.addButton("Waterfall", waterfall);
     gui.addButton("JellyFish", jellyfish);
-    
+    gui.addButton("Circles Wave", circles_wave);
+    gui.addButton("Particle Settings", particle_settings);
     gui.setPage(1);
     gui.show();
     
@@ -158,8 +182,56 @@ void testApp::setup(){
     //m_emitter.gravity.y = m_emitter.gravity.y * -1;
 }
 
+void testApp::colorsUpdateGUI(){
+///*
+    startColor.set(m_emitter.startColor.red, 
+                   m_emitter.startColor.green, 
+                   m_emitter.startColor.blue, 
+                   m_emitter.startColor.alpha);
+    startColorVariance.set(m_emitter.startColorVariance.red, 
+                           m_emitter.startColorVariance.green, 
+                           m_emitter.startColorVariance.blue, 
+                           m_emitter.startColorVariance.alpha);
+    finishColor.set(m_emitter.finishColor.red, 
+                    m_emitter.finishColor.green, 
+                    m_emitter.finishColor.blue, 
+                    m_emitter.finishColor.alpha);
+    finishColorVariance.set(m_emitter.finishColorVariance.red, 
+                            m_emitter.finishColorVariance.green, 
+                            m_emitter.finishColorVariance.blue, 
+                            m_emitter.finishColorVariance.alpha);
+//*/
+}
+
+void testApp::colorsUpdateEmitter(){
+///*
+    m_emitter.startColor.red    = startColor.r;
+    m_emitter.startColor.green  = startColor.g;
+    m_emitter.startColor.blue   = startColor.b;
+    m_emitter.startColor.alpha  = startColor.a;
+    
+    m_emitter.startColorVariance.red    = startColorVariance.r;
+    m_emitter.startColorVariance.green  = startColorVariance.g;
+    m_emitter.startColorVariance.blue   = startColorVariance.b;
+    m_emitter.startColorVariance.alpha  = startColorVariance.a;
+    
+    m_emitter.finishColor.red   = finishColor.r;
+    m_emitter.finishColor.green = finishColor.g;
+    m_emitter.finishColor.blue  = finishColor.b;
+    m_emitter.finishColor.alpha = finishColor.a;
+    
+    m_emitter.finishColorVariance.red   = finishColorVariance.r;
+    m_emitter.finishColorVariance.green = finishColorVariance.g;
+    m_emitter.finishColorVariance.blue  = finishColorVariance.b;
+    m_emitter.finishColorVariance.alpha = finishColorVariance.a;
+//*/    
+}
+
+
 //--------------------------------------------------------------
 void testApp::update(){
+    
+    colorsUpdateEmitter();
     
     m_emitter.update();
     
@@ -242,6 +314,14 @@ void testApp::update(){
     else if( jellyfish ) {
         jellyfish = false;
         loadFromParticleXML("jellyfish.pex");
+    }
+    else if( circles_wave ) {
+        jellyfish = false;
+        loadFromParticleXML("circles_wave.pex");
+    }
+    else if( particle_settings ) {
+        particle_settings = false;
+        loadFromParticleXML("particle_settings.pex");
     }
     else {
         //ofSetWindowTitle("Released");
@@ -388,16 +468,18 @@ void testApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button){
-
-    /*m_emitter.sourcePosition.x = x;
-	m_emitter.sourcePosition.y = y;*/
+/*
+    m_emitter.sourcePosition.x = x;
+	m_emitter.sourcePosition.y = y;
+//*/
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
-
-    /*m_emitter.sourcePosition.x = x;
-	m_emitter.sourcePosition.y = y;*/
+/*
+    m_emitter.sourcePosition.x = x;
+	m_emitter.sourcePosition.y = y;
+//*/
 }
 
 //--------------------------------------------------------------
@@ -622,6 +704,7 @@ void testApp::loadFromParticleXML(string xmlname) {
     
     m_emitter.sourcePosition.x = ofGetWidth()/2;
     m_emitter.sourcePosition.y = ofGetHeight()/2;
+    colorsUpdateGUI();
     
     m_emitter.gravity.y = m_emitter.gravity.y * -1; //FIX for y axis
 }
