@@ -1,7 +1,7 @@
 ----- A simple Particle Designer for OpenFrameworks -----
 
 //////////////////////
-// ludimatoin notes //
+// ludimation notes //
 //////////////////////
 - had to rebuild project and create some functions to make this run properly on my OSX 10.6 mac
 - main issues seem to stem from the fact that ofxParticleSystem uses Color4f's for particles
